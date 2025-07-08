@@ -1,0 +1,163 @@
+
+RESULTS SIMULATOR GEM
+SRFORMAT SR3
+INUNIT FIELD
+WSRF WELL 1
+WSRF GRID TIME
+OUTSRF GRID DENG MOLALITY 'CO2' TGIP POROS PERM PRES GEORTYPE SG SW TEMP **GHGSOL GHGSCRIT GHGLIQ GHGGAS GHGTHY
+OUTSRF GRID Y 'CO2' 'C1' ** gas phase 
+OUTSRF GRID W 'CO2' ** aqueous phase
+OUTSRF GRID Z 'CO2' ** global phase 
+OUTSRF RES NONE
+OUTSRF SPECIAL GHGAQU GHGGAS GHGLIQ GHGMNR GHGSCRIT GHGSOL GHGTHY 
+INVENTORY-CO2
+WPRN GRID TIME
+WPRN WELL 1
+OUTPRN GRID PRES SG TGIP SW MOLALITY 'CO2'
+OUTPRN GRID Y 'CO2' ** gas phase 
+OUTPRN GRID W 'CO2' ** aqueous phase
+OUTPRN GRID Z 'CO2' ** global phase 
+OUTPRN RES NONE
+**  Distance units: ft 
+RESULTS XOFFSET           0.0000
+RESULTS YOFFSET           0.0000
+RESULTS ROTATION           0.0000  **  (DEGREES)
+RESULTS AXES-DIRECTIONS 1.0 1.0 1.0
+** ***************************************************************************
+** Definition of fundamental corner point grid
+** ***************************************************************************
+GRID CORNER 32 32 16
+KDIR DOWN
+INCLUDE 'xcorn.inc'
+INCLUDE 'ycorn.inc'
+INCLUDE 'zcorn.inc'
+
+INCLUDE 'porosity.inc'
+INCLUDE 'permeability.inc'
+PERMJ  EQUALSI
+PERMK  EQUALSI * 0.1
+
+NULL CON 1
+PINCHOUTARRAY CON 1
+CPOR 3.85e-6
+**PVCUTOFF 24750
+
+CROCKTYPE 1
+CCPOR 3.85e-6
+CPRPOR 1805
+**ROCK HEAT CAPACITY [BTU/(LB F)]
+*CP-ROCK  0.25
+**THERMAL CONDUCTIVITY OF ROCK AND FLUIDS [BTU/(HR LB F)]
+*THCONR0  1.16
+
+AQUIFER RESBND **RES_EDGE
+AQLEAK  ON
+AQMETHOD  CARTER-TRACY
+END-GRID
+TRPOR 60
+
+
+**--------------------------------------------------FLUID COMPONENT DATA--------------------------------------------------
+INCLUDE 'fluid_data.inc'
+
+**--------------------------------------------------ROCK FLUID----------
+INCLUDE 'rock_fluid_data.inc
+INCLUDE 'rocktype.inc'
+
+INITIAL
+
+USER_INPUT
+PRES CON 1603.16	
+SW CON            1
+ZGLOBALC 'CO2' CON    0
+ZGLOBALC 'C1' CON     1
+TEMPER CON 100.87
+
+NUMERICAL
+**ADTSC
+
+
+RUN
+DATE 2024 1 1
+************************************************************
+WELL  'Well 1' 
+INJECTOR 'Well 1'
+IWELLBORE  MODEL
+** wdepth  wlength  rel_rough  whtemp  bhtemp  wradius
+4020.0  4020.0  0.0002  60.0  120.0  0.163
+INCOMP  SOLVENT  1.0  0.0
+** if pressure surpresses BHP, switch to fixed presure BC time of reaching BHP
+OPERATE  MAX  STG  0.0  CONT REPEAT
+OPERATE  MAX  BHP  1950.0  CONT REPEAT
+**          rad  geofac  wfrac  skin
+GEOMETRY  K  0.25  0.37  1.0  -1  
+PERF      GEOA  'Well 1'
+** UBA            ff   Status  Connection  
+10 10  $well_1_perf_top:$well_1_perf_bottom    1.0  OPEN    FLOW-FROM  'SURFACE'  REFLAYER
+************************************************************
+WELL  'Well 2' 
+INJECTOR 'Well 2'
+IWELLBORE  MODEL
+** wdepth  wlength  rel_rough  whtemp  bhtemp  wradius
+4020.0  4020.0  0.0002  60.0  120.0  0.163
+INCOMP  SOLVENT  1.0  0.0
+OPERATE  MAX  STG  0.0  CONT REPEAT
+OPERATE  MAX  BHP  1950.0  CONT REPEAT
+**          rad  geofac  wfrac  skin
+GEOMETRY  K  0.25  0.37  1.0  -1 
+PERF      GEOA  'Well 2'
+** UBA                 ff          Status  Connection  
+10 23  $well_2_perf_top:$well_1_perf_bottom    1.0  OPEN    FLOW-FROM  'SURFACE'  REFLAYER
+************************************************************
+WELL  'Well 3'
+INJECTOR 'Well 3'
+IWELLBORE  MODEL
+4020.0  4020.0  0.0002  60.0  120.0  0.163
+INCOMP  SOLVENT  1.0  0.0
+OPERATE  MAX  STG  0.0  CONT REPEAT
+OPERATE  MAX  BHP  1950.0  CONT REPEAT
+GEOMETRY  K  0.25  0.37  1.0  -1  
+PERF      GEOA  'Well 3'
+23 23  $well_3_perf_top:$well_3_perf_bottom          1.0  OPEN    FLOW-FROM  'SURFACE'  REFLAYER
+************************************************************
+WELL  'Well 4'
+INJECTOR 'Well 4'
+IWELLBORE  MODEL
+4020.0  4020.0  0.0002  60.0  120.0  0.163
+INCOMP  SOLVENT  1.0  0.0
+OPERATE  MAX  STG  0.0  CONT REPEAT
+OPERATE  MAX  BHP  1950.0  CONT REPEAT
+GEOMETRY  K  0.25  0.37  1.0  -1
+PERF      GEOA  'Well 4'
+23 10 $well_4_perf_top:$well_4_perf_bottom          1.0  OPEN    FLOW-FROM  'SURFACE'  REFLAYER
+
+
+INCLUDE 'operation_1.inc'
+DATE 2025 1 1.0
+INCLUDE 'operation_2.inc'
+DATE 2026 1 1.0
+INCLUDE 'operation_3.inc'
+DATE 2027 1 1.0
+
+STOP
+
+RESULTS SPEC 'Permeability J'  
+RESULTS SPEC SPECNOTCALCVAL -99999      
+RESULTS SPEC REGION 'All Layers (Whole Grid)'
+RESULTS SPEC REGIONTYPE 'REGION_WHOLEGRID'
+RESULTS SPEC LAYERNUMB 0
+RESULTS SPEC PORTYPE 1
+RESULTS SPEC EQUALSI 0 1           
+RESULTS SPEC SPECKEEPMOD 'YES'
+RESULTS SPEC STOP
+
+
+RESULTS SPEC 'Permeability K'  
+RESULTS SPEC SPECNOTCALCVAL -99999      
+RESULTS SPEC REGION 'All Layers (Whole Grid)'
+RESULTS SPEC REGIONTYPE 'REGION_WHOLEGRID'
+RESULTS SPEC LAYERNUMB 0
+RESULTS SPEC PORTYPE 1
+RESULTS SPEC EQUALSI 1 0.1         
+RESULTS SPEC SPECKEEPMOD 'YES'
+RESULTS SPEC STOP
